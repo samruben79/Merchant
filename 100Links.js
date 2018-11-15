@@ -11,7 +11,7 @@ const fs = require('fs');
 
 
 // document.on('click','runMe',function(){
-//   alert('hey')
+//   alert('hey'w)
   (async () => {
     const browser = await puppeteer.launch({headless: false, timeout: 0});
     const page = await browser.newPage();
@@ -32,12 +32,19 @@ const fs = require('fs');
 
     const result = await page.evaluate((selector) => {
       const nodes = document.querySelectorAll(selector);
+      // const netowrk = document.querySelectorAll(selector2)
       const links = [...nodes];
-      return links.map(link => link.href);
+      // const networkLinks = [...network]
+
+        return links.map(link => link.href);
 
 
 
-    },'#program_directory_table > tbody > tr > td > a');
+
+
+
+    },'#program_directory_table > tbody > tr > td > a'
+  );
     //console.log(result)
     const compNames = await page.evaluate((selector) => {
       const nodes = document.querySelectorAll(selector);
@@ -48,19 +55,32 @@ const fs = require('fs');
 
     },'#program_directory_table > tbody > tr > td > a');
     //console.log(compNames)
+    const networkNames = await page.evaluate((selector) => {
+      const nodes = document.querySelectorAll(selector);
+      const links = [...nodes];
+      return links.map(link => link.textContent);
+
+
+
+    },'#program_directory_table > tbody > tr > td:nth-child(3)');
+  
 
     console.log("[#] Done Getting Links and Names \n");
 
     for (let i = link_start; i < result.length; i++){
       let compLink = result[i]
       let name = compNames[i]
+      let network = networkNames[i]
       await page.waitFor(1000)
-      console.log("[*] Company Name: " + name)
-      console.log("[*] Merchant Hub Link: " + compLink);
-      fs.appendFile('companies.txt',"\n[*] Company Name: " + name +"\n[*] Merchant Hub Link: " + compLink, function (err) {
-        if (err) throw err;
+      //Filter Network here/////////////
+      if(network == "Pepperjam"){
+        ///////////////
+        console.log("[*] Company Name: " + name)
+        console.log("[*] Merchant Hub Link: " + compLink);
+        fs.appendFile('companies.txt',"\n[*] Company Name: " + name +"\n[*] Merchant Hub Link: " + compLink, function (err) {
+          if (err) throw err;
+        });
 
-      });
       await page.goto(compLink, {waitUntil: 'networkidle2'});
 
       const newLink = await page.evaluate((selector1) => {
@@ -80,6 +100,7 @@ const fs = require('fs');
         console.log("[*] Company Link: " + newLink[0])
 
     }
+  }
     // console.log(newLink)
     await page.close();
     await browser.close();

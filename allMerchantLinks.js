@@ -36,12 +36,19 @@ const puppeteer = require('puppeteer');
       const links = [...nodes];
       return links.map(link => link.textContent);
     },'#program_directory_table > tbody > tr > td > a');
+    const networkNames = await page.evaluate((selector) => {
+      const nodes = document.querySelectorAll(selector);
+      const links = [...nodes];
+      return links.map(link => link.textContent);
+    },'#program_directory_table > tbody > tr > td:nth-child(3)');
     console.log("[#] Done Getting Links and Names ");
 
     for (let i = link_start; i < result.length; i++){
       let compLink = result[i]
       let name = compNames[i]
       await page.waitFor(2000)
+      //Filter Network here/////////////
+      if(network == "Pepperjam"){
       console.log("[*] Company Name: " + name)
       console.log("[*] Merchant Hub Link: " + compLink);
       fs.appendFile('allCompanies.txt',"\n[*] Company Name: " + name +"\n[*] Merchant Hub Link: " + compLink, function (err) {
@@ -62,6 +69,7 @@ const puppeteer = require('puppeteer');
       console.log("[*] Company Link: " + newLink[0])
 
       }
+    }
       await page.close();
       await browser.close();
       console.log("------ DONE ------");
